@@ -1,0 +1,6 @@
+python-dotenv
+openai[realtime]
+sounddevice
+numpy
+langsmith
+langchain-openai
