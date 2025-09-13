@@ -1,16 +1,19 @@
 import asyncio
 import base64
 import os
+import time
 from typing import Any
 
 import numpy as np
 import sounddevice as sd  # Mic + speaker
 from openai import AsyncOpenAI
-
+from langsmith import traceable, Client
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
+# ---- LangSmith setup ----
+langsmith_client = Client()
 
 # ---- Audio params (keep them in sync for input/output) ----
 SAMPLE_RATE = 24000  # common realtime model rate
@@ -58,6 +61,26 @@ class Microphone:
     def close(self) -> None:
         self.stream.stop(); self.stream.close()
 
+# ---- LangSmith instrumentation functions ----
+@traceable(client=langsmith_client, run_type="chain", name="User Message")
+def log_user_message(message: str, timestamp: float) -> dict:
+    """Log user message to LangSmith."""
+    return {
+        "message": message,
+        "timestamp": timestamp,
+        "message_type": "user_input"
+    }
+
+@traceable(client=langsmith_client, run_type="chain", name="AI Response")
+def log_ai_response(message: str, timestamp: float) -> dict:
+    """Log AI response to LangSmith."""
+    return {
+        "message": message,
+        "timestamp": timestamp,
+        "message_type": "ai_response"
+    }
+
+@traceable(client=langsmith_client, run_type="chain", name="Conversation Session")
 async def main() -> None:
     # 1) Create client and open a realtime session (WebSocket)
     client = AsyncOpenAI()  # reads OPENAI_API_KEY
@@ -86,10 +109,10 @@ async def main() -> None:
                             "type": "audio/pcm", 
                             "rate": 24000
                         },
-                        "voice": "alloy"  # Voice configuration in output section
+                        "voice": "alloy"  # 'alloy', 'ash', 'ballad', 'coral', 'echo', 'sage', 'shimmer', 'verse', 'marin', and 'cedar'
                     }
                 },
-                "instructions": "Be concise and friendly. You are Italian and speak in Italian. Do not say a lot of things, give some time to the user to answer.",
+                "instructions": "Be concise and friendly. You are from US and speak in US English. Do not say a lot of things, give some time to the user to answer.",
             })
 
             # 3) Task A: send mic audio chunks to the model continuously
@@ -121,14 +144,20 @@ async def main() -> None:
                         # Print live transcript of audio output
                         print(event.delta, end="", flush=True)
                     elif t == "response.output_audio_transcript.done":
+                        # Log AI response to LangSmith
+                        ai_transcript = getattr(event, 'transcript', '')
+                        if ai_transcript:
+                            log_ai_response(ai_transcript, time.time())
                         print()
                     elif t == "conversation.item.input_audio_transcription.delta":
                         # Print live transcript of user input
                         # print(f"[User] {event.delta}", end="", flush=True)
                         continue
                     elif t == "conversation.item.input_audio_transcription.completed":
-                        # Print completed user transcript
-                        print(f"[User] {event.transcript}")
+                        # Print completed user transcript and log to LangSmith
+                        user_message = event.transcript
+                        print(f"[User] {user_message}")
+                        log_user_message(user_message, time.time())
                     elif t == "input_audio_buffer.speech_started":
                         print("\n[User speaking...]")
                     elif t == "input_audio_buffer.speech_stopped":
@@ -157,6 +186,8 @@ async def main() -> None:
     finally:
         mic.close()
         speaker.close()
+        # Ensure all LangSmith traces are submitted before exiting
+        langsmith_client.flush()
 
 if __name__ == "__main__":
     # On macOS, you may need: brew install portaudio ffmpeg
