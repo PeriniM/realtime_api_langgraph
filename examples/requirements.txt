@@ -4,3 +4,5 @@ sounddevice
 numpy
 langsmith
 langchain-openai
+langgraph
+langchain

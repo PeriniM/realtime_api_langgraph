@@ -1,0 +1,142 @@
+.agent-result-message {
+  margin: 8px 0;
+  border-radius: 8px;
+  background: #f0f5f5;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  min-height: 60px; /* Ensure minimum height */
+  width: 100%; /* Ensure full width */
+}
+
+.agent-result-message:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.agent-result-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+  min-height: 48px; /* Ensure minimum header height */
+}
+
+.agent-result-header:hover {
+  background-color: rgba(74, 74, 74, 0.05);
+}
+
+.agent-result-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: #4a4a4a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.agent-result-title {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.agent-badge {
+  background: #4a4a4a;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.agent-preview {
+  font-size: 13px;
+  color: #666666;
+  font-style: italic;
+  flex: 1;
+  min-width: 0;
+}
+
+.agent-time {
+  font-size: 12px;
+  color: #999999;
+  font-weight: 500;
+  margin-left: auto;
+}
+
+.agent-result-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  background: rgba(74, 74, 74, 0.1);
+  transition: all 0.2s ease;
+}
+
+.agent-result-toggle:hover {
+  background: rgba(74, 74, 74, 0.2);
+}
+
+.toggle-icon {
+  color: #4a4a4a;
+  transition: transform 0.2s ease;
+}
+
+.agent-result-content {
+  overflow: hidden;
+}
+
+.agent-result-text {
+  padding: 16px;
+  padding-top: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #2c2c2c;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+/* Animation for the chevron rotation */
+.agent-result-header:hover .toggle-icon {
+  transform: scale(1.1);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .agent-result-header {
+    padding: 10px 12px;
+  }
+  
+  .agent-result-icon {
+    width: 28px;
+    height: 28px;
+    margin-right: 10px;
+  }
+  
+  .agent-badge {
+    font-size: 11px;
+    padding: 3px 10px;
+  }
+  
+  .agent-time {
+    font-size: 11px;
+  }
+  
+  .agent-result-text {
+    padding: 12px;
+    padding-top: 0;
+    font-size: 13px;
+  }
+}
